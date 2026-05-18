@@ -1,8 +1,32 @@
 # RICbot Operation
 
-Docker-based ROS 2 setup for running the RICbot from a control machine. The
-robot runs only the hardware drivers, while the control machine runs Zenoh
-networking, RViz, mapping, map saving, and Nav2.
+This page describes the practical startup workflow for operating the RICbot
+with the Docker-based ROS 2 setup from this repository.
+
+The robot itself runs only the hardware-facing drivers. A separate control
+machine(like your laptop) runs the operator tools and ROS 2 services:
+
+- Zenoh router for ROS 2 communication.
+- RViz for visualization and interaction.
+- Cartographer for mapping.
+- Nav2 for navigation with a saved map.
+- Map saving tools for writing generated maps back into the repository.
+
+For deeper details about individual components, use the dedicated sections in
+the documentation navigation, especially **Navigation** and **AI**.
+This page focuses on the order of commands needed to bring up the system.
+
+## System Layout
+
+The setup is split across two machines:
+
+- **Control machine:** a developer workstation, lab PC, or laptop that has this
+  repository checked out and runs the operator-side Docker containers.
+- **Robot:** the RICbot machine that runs the hardware driver container and
+  connects back to the Zenoh router on the control machine.
+
+The startup order matters: the `zenoh_router` container must already be running
+on the control machine before the robot driver is started.
 
 ## Requirements
 
@@ -32,6 +56,7 @@ the robot and start the robot driver container:
 ```bash
 bash start_ricbot.bash <control-machine-ip>
 ```
+Where `<control-machine-ip>` is IP address of your machine.
 
 The script sets the robot container's Zenoh endpoint to the Zenoh router on the
 control machine. If you need to set the endpoint manually, use:
@@ -39,6 +64,9 @@ control machine. If you need to set the endpoint manually, use:
 ```bash
 ZENOH_CONNECT_ENDPOINT=tcp/<control-machine-ip>:7447 docker compose up ricbot
 ```
+
+If the robot cannot connect, first check that `zenoh_router` is still running on
+the control machine and that the IP address is reachable from the robot.
 
 ## Create a Map
 
@@ -68,6 +96,7 @@ ros2 run nav2_map_server map_saver_cli -f /map_data/<map_name>
 
 This writes `<map_name>.yaml` and the map image into
 `ricbot_navigation/maps/` on the control machine.
+
 
 ## Navigate With a Saved Map
 
@@ -109,6 +138,8 @@ In RViz, set the robot's initial pose with `2D Pose Estimate`. The arrow should
 point in the robot's forward direction. Once localization matches the map, send
 a goal with `2D Goal Pose`.
 
+If localization does not match the visible map, try to give a better initial estimate pose or restart navigation with the correct map file and set the initial pose again before sending a goal.
+
 ## Useful Paths
 
 - Maps: `ricbot_navigation/maps/`
@@ -118,7 +149,7 @@ a goal with `2D Goal Pose`.
 
 ## Stopping
 
-Detach from `tmux` with `Ctrl-b`, then `d`.
+Detach from `tmux` with `d`, and then `Ctrl-d`.
 
 Stop the control-machine-side containers with:
 
