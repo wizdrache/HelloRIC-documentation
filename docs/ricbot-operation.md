@@ -109,7 +109,7 @@ bash navigation.bash
 By default this loads:
 
 ```text
-/map_data/rh1_eg_new_map.yaml
+./map_data/rh1_eg_new_map.yaml
 ```
 
 To use another map in `ricbot_navigation/maps/`, pass either the map base name
@@ -117,7 +117,7 @@ or the full container path:
 
 ```bash
 bash navigation.bash rh1_eg_map
-bash navigation.bash /map_data/rh1_et1_map.yaml
+bash navigation.bash ./map_data/rh1_et1_map.yaml
 ```
 
 You can also set the map with an environment variable:
