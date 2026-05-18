@@ -142,10 +142,31 @@ If localization does not match the visible map, try to give a better initial est
 
 ## Useful Paths
 
-- Maps: `ricbot_navigation/maps/`
-- Nav2 parameters: `ricbot_navigation/config/nav2_params.yaml`
-- Cartographer configuration: `ricbot_navigation/config/cartographer_2d.lua`
-- Docker services: `compose.yml`
+The operation scripts expect to be run from the repository root. These are the
+main files and directories that are relevant during mapping and navigation:
+
+- `ricbot_navigation/maps/`: stores saved maps. Each map usually consists of a
+  `.yaml` metadata file and an image file. `map_saver_cli` writes new maps here
+  through the `/map_data` mount inside the container. Navigation also reads map
+  files from this directory.
+- `ricbot_navigation/config/nav2_params.yaml`: contains Nav2 configuration such
+  as planner, controller, costmap, and localization parameters. Change this
+  when navigation behavior needs tuning, for example obstacle inflation,
+  controller behavior, or AMCL settings.
+- `ricbot_navigation/config/cartographer_2d.lua`: contains the 2D Cartographer
+  SLAM configuration used while creating a map. Change this when map building
+  quality needs tuning, for example scan matching or trajectory builder
+  parameters.
+- `compose.yml`: defines the Docker services used by this workflow, including
+  `zenoh_router`, `ricbot`, `rviz`, `nav`, `nav_cartographer`, and `teleop`.
+  Check this file when changing container images, mounted volumes, devices, or
+  Zenoh-related environment variables.
+- `map_recorder.bash`: starts the mapping `tmux` session on the control
+  machine.
+- `navigation.bash`: starts the navigation `tmux` session on the control
+  machine.
+- `start_ricbot.bash`: Should be run on the robot, and starts the robot-side driver container, and accepts the
+  control machine IP address as an optional argument.
 
 ## Stopping
 
